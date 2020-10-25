@@ -1,69 +1,140 @@
-// use sdl2::event::Event;
-// use sdl2::keyboard::Keycode;
+use std::collections::HashMap;
 
-// use crate::GameCommand;
+use sdl2::keyboard::Scancode;
 
-// pub struct 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum KeyStates {
+    Up,
+    Down,
+}
 
-// #[allow(dead_code)]
-// pub struct Keyboard {
-//     event_pump: sdl2::EventPump,
-//     handle_keydown: Box<dyn FnMut(sdl2::event::Event) -> GameCommand>,
-//     handle_keyup: Box<dyn FnMut(sdl2::event::Event) -> GameCommand>,
-// }
+#[derive(Debug, Clone)]
+pub struct KeyboardState {
+    previous: HashMap<Scancode, bool>,
+    current: HashMap<Scancode, bool>,
+}
 
-// impl Keyboard {
-//     pub fn new(event_pump: sdl2::EventPump) -> Keyboard {
-//         Keyboard {
-//             event_pump: event_pump,
-//             // handle_keydown: Box::new(on_keydown_event_sync),
-//             // handle_keyup: Box::new(on_keyup_event_sync),
-//         }
-//     }
+#[derive(Debug, Clone, Copy)]
+pub struct KeyState {
+    state: KeyStates,
+    shift: KeyStates,
+    alt: KeyStates,
+    ctrl: KeyStates,
+    left_shift: KeyStates,
+    left_alt: KeyStates,
+    left_ctrl: KeyStates,
+    right_shift: KeyStates,
+    right_alt: KeyStates,
+    right_ctrl: KeyStates,
+}
 
-//     // pub fn set_keydown_event(
-//     //     &mut self,
-//     //     f: impl FnMut(sdl2::event::Event) -> GameCommand + 'static,
-//     // ) {
-//     //     self.handle_keydown = Box::new(f);
-//     // }
+impl KeyboardState {
+    pub fn new(events: &sdl2::EventPump) -> KeyboardState {
+        let mut state = KeyboardState {
+            previous: HashMap::new(),
+            current: HashMap::new(),
+        };
 
-//     // pub fn clear_keydown_event(&mut self) {
-//     //     self.handle_keydown = Box::new(on_keydown_event_sync)
-//     // }
+        let keys = events.keyboard_state();
 
-//     // pub fn set_keyup_event(&mut self, f: impl FnMut(sdl2::event::Event) -> GameCommand + 'static) {
-//     //     self.handle_keyup = Box::new(f);
-//     // }
+        for key in keys.scancodes() {
+            state.current.insert(key.0, key.1);
+            state.previous.insert(key.0, false);
+        }
+        state
+    }
 
-//     // pub fn clear_keyup_event(&mut self) {
-//     //     self.handle_keyup = Box::new(on_keyup_event_sync);
-//     // }
+    pub fn update(&mut self, events: &sdl2::EventPump) {
+        let keys = events.keyboard_state();
 
-//     pub fn poll(&mut self) -> GameCommand {
-//         for event in self.event_pump.poll_iter() {
-//             match event {
-//                 Event::Quit { .. } |
-//                 Event::KeyDown { keycode: sdl2::keycode::Q, .. }=> {
-//                     return GameCommand::Quit
-//                 }
-//                 // Event::KeyDown { .. } => {
-//                 //     return (self.handle_keydown)(event)
-//                 // }
-//                 // Event::KeyUp { .. } => {
-//                 //     return (self.handle_keyup)(event)
-//                 // }
-//                 _ => {}
-//             }
-//         }
-//         GameCommand::Continue
-//     }
-// }
+        for (key, state) in &self.current {
+            self.previous.insert(*key, *state);
+        }
 
-// fn on_keydown_event_sync(_e: Event) -> GameCommand {
-//     GameCommand::Continue
-// }
+        for key in keys.scancodes() {
+            self.current.insert(key.0, key.1);
+        }
+    }
+    pub fn get_keystate(&self, key: Scancode) -> KeyState {
+        let mut ks = KeyState {
+            state: KeyStates::Up,
+            shift: KeyStates::Up,
+            alt: KeyStates::Up,
+            ctrl: KeyStates::Up,
+            left_shift: KeyStates::Up,
+            right_shift: KeyStates::Up,
+            left_alt: KeyStates::Up,
+            right_alt: KeyStates::Up,
+            left_ctrl: KeyStates::Up,
+            right_ctrl: KeyStates::Up,
+        };
 
-// fn on_keyup_event_sync(_e: Event) -> GameCommand {
-//     GameCommand::Continue
-// }
+        if self.is_down(key) {
+            ks.state = KeyStates::Down
+        };
+        if self.is_down(Scancode::LShift) {
+            ks.left_shift = KeyStates::Down;
+            ks.shift = KeyStates::Down;
+        };
+        if self.is_down(Scancode::RShift) {
+            ks.right_shift = KeyStates::Down;
+            ks.shift = KeyStates::Down;
+        };
+        if self.is_down(Scancode::LAlt) {
+            ks.left_alt = KeyStates::Down;
+            ks.alt = KeyStates::Down;
+        };
+        if self.is_down(Scancode::RAlt) {
+            ks.right_shift = KeyStates::Down;
+            ks.alt = KeyStates::Down;
+        };
+        if self.is_down(Scancode::LCtrl) {
+            ks.left_ctrl = KeyStates::Down;
+            ks.ctrl = KeyStates::Down;
+        };
+        if self.is_down(Scancode::RCtrl) {
+            ks.right_ctrl = KeyStates::Down;
+            ks.alt = KeyStates::Down;
+        };
+
+        ks
+    }
+
+    pub fn is_down(&self, key: Scancode) -> bool {
+        match self.current.get(&key) {
+            Some(state) => *state,
+            None => false,
+        }
+    }
+
+    pub fn is_up(&self, key: Scancode) -> bool {
+        match self.current.get(&key) {
+            Some(state) => *state,
+            None => false,
+        }
+    }
+
+    pub fn on_down(&self, key: Scancode) -> bool {
+        let cs = match self.current.get(&key) {
+            Some(state) => *state,
+            None => false,
+        };
+        let ls = match self.previous.get(&key) {
+            Some(state) => *state,
+            None => false,
+        };
+        ls == false && cs == true
+    }
+
+    pub fn on_up(&self, key: Scancode) -> bool {
+        let cs = match self.current.get(&key) {
+            Some(state) => *state,
+            None => false,
+        };
+        let ls = match self.previous.get(&key) {
+            Some(state) => *state,
+            None => false,
+        };
+        ls == true && cs == false
+    }
+}

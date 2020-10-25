@@ -4,9 +4,8 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::keyboard::Scancode;
 use sdl2::pixels::Color;
-// use sdl2::keyboard::Mod;
 
-use sdlgame::{KeyState, KeyStates, KeyboardState};
+use sdlgame::keyboard::{KeyboardState};
 
 struct State {
     bgcolor: Color,
@@ -51,11 +50,11 @@ fn main() -> Result<(), String> {
                 _ => {}
             }
         }
-        kbstate.update_state(&event_pump);
+        kbstate.update(&event_pump);
 
-        state.handle_r(kbstate.get_keystate(Scancode::R));
-        state.handle_g(kbstate.get_keystate(Scancode::G));
-        state.handle_b(kbstate.get_keystate(Scancode::B));
+        state.handle_r(&kbstate);
+        state.handle_g(&kbstate);
+        state.handle_b(&kbstate);
 
         canvas.set_draw_color(state.bgcolor);
         canvas.clear();
@@ -65,9 +64,9 @@ fn main() -> Result<(), String> {
 }
 
 impl State {
-    fn handle_r(&mut self, key: KeyState) {
-        if key.state == KeyStates::Down {
-            if key.left_shift == KeyStates::Down || key.right_shift == KeyStates::Down {
+    fn handle_r(&mut self, keyb: &KeyboardState) {
+        if keyb.is_down(Scancode::R) {
+            if keyb.is_down(Scancode::LShift) || keyb.is_down(Scancode::RShift) {
                 if self.bgcolor.r != 0 {
                     self.bgcolor.r -= 1;
                 }
@@ -78,9 +77,9 @@ impl State {
             }
         }
     }
-    fn handle_g(&mut self, key: KeyState) {
-        if key.state == KeyStates::Down {
-            if key.left_shift == KeyStates::Down || key.right_shift == KeyStates::Down {
+    fn handle_g(&mut self, keyb: &KeyboardState) {
+        if keyb.is_down(Scancode::G) {
+            if keyb.is_down(Scancode::LShift) || keyb.is_down(Scancode::RShift) {
                 if self.bgcolor.g != 0 {
                     self.bgcolor.g -= 1;
                 }
@@ -91,9 +90,9 @@ impl State {
             }
         }
     }
-    fn handle_b(&mut self, key: KeyState) {
-        if key.state == KeyStates::Down {
-            if key.left_shift == KeyStates::Down || key.right_shift == KeyStates::Down {
+    fn handle_b(&mut self, keyb: &KeyboardState) {
+        if keyb.is_down(Scancode::B) {
+            if keyb.is_down(Scancode::LShift) || keyb.is_down(Scancode::RShift) {
                 if self.bgcolor.b != 0 {
                     self.bgcolor.b -= 1;
                 }
