@@ -12,6 +12,10 @@ use sdl2::Sdl;
 
 // use sdlgame::*;
 
+const TITLE: &str = "Blank Window Demo";
+const MAX_WIDTH: u32 = 800;
+const MAX_HEIGHT: u32 = 600;
+
 #[allow(dead_code)]
 struct State {
     // Sdl State
@@ -23,17 +27,10 @@ struct State {
 }
 
 fn main() -> Result<(), String> {
-    let context = sdl2::init().expect("sdl2::init failed");
-    let video_subsystem = context.video().expect("video subsytem init failed");
-    let window = video_subsystem
-        .window("Blank Window Demo. Press ALT+F4 to close or click the Esc", 800, 600)
-        .position_centered()
-        .build()
-        .expect("unable to create window");
-    let canvas = window
-        .into_canvas()
-        .build()
-        .expect("unable to create canvas");
+    let ctx_can = sdlgame::standard_800_600_canvas(TITLE, MAX_WIDTH, MAX_HEIGHT);
+    let context = ctx_can.0;
+    let canvas = ctx_can.1;
+
     let mut state = State {
         context: context,
         canvas: canvas,

@@ -12,10 +12,11 @@ use sdl2::render::WindowCanvas;
 
 use sdlgame::keyboard::KeyboardState;
 
-const INITIAL_CIRCLES: usize = 50;
-const MAX_CIRCLE_RADIUS: u32 = 100;
+const TITLE: &str = "Circles Demo - R/G/B - Increase Red/Green/Blue. Shift descreases. +/- Changes no. Circles. F toggle fills";
 const MAX_WIDTH: u32 = 800;
 const MAX_HEIGHT: u32 = 600;
+const INITIAL_CIRCLES: usize = 50;
+const MAX_CIRCLE_RADIUS: u32 = 100;
 
 #[derive(Debug)]
 struct Circle {
@@ -41,25 +42,9 @@ enum FillMode {
 }
 
 fn main() -> Result<(), String> {
-    let context = sdl2::init().expect("sdl2::init failed");
-    let video_subsystem = context.video().expect("video subsytem init failed");
-
-    let window = video_subsystem
-        .window(
-            "Circles Demo. +/- to change line numbers / F5 to randminse lines / F6 to randomise colours",
-            MAX_WIDTH,
-            MAX_HEIGHT,
-        )
-        .position_centered()
-        .opengl()
-        .build()
-        .expect("unable to create window");
-
-    let mut canvas = window
-        .into_canvas()
-        .present_vsync()
-        .build()
-        .expect("unable to create canvas");
+    let ctx_can = sdlgame::standard_800_600_canvas(TITLE, MAX_WIDTH, MAX_HEIGHT);
+    let context = ctx_can.0;
+    let mut canvas = ctx_can.1;
 
     let mut state = State {
         bgcolor: Color::RGB(0, 0, 0),

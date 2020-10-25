@@ -10,11 +10,12 @@ use sdl2::render::WindowCanvas;
 
 use sdlgame::keyboard::KeyboardState;
 
+const TITLE: &str = "Rects Demo - R/G/B - Increase Red/Green/Blue. Shift descreases. +/- Changes no. Rects. F toggle fills";
+const MAX_RECT_WIDTH: u32 = 100;
+const MAX_RECT_HEIGHT: u32 = 100;
 const INITIAL_RECTS: usize = 50;
 const MAX_WIDTH: u32 = 800;
 const MAX_HEIGHT: u32 = 600;
-const MAX_RECT_WIDTH: u32 = 100;
-const MAX_RECT_HEIGHT: u32 = 100;
 
 #[derive(Debug)]
 struct Rect {
@@ -41,24 +42,9 @@ enum FillMode {
 }
 
 fn main() -> Result<(), String> {
-    let context = sdl2::init().expect("sdl2::init failed");
-    let video_subsystem = context.video().expect("video subsytem init failed");
-
-    let window = video_subsystem
-        .window(
-            "Rects Demo. +/- to change line numbers / F5 to randminse lines / F6 to randomise colour / F to randomise Fills",
-            MAX_WIDTH,
-            MAX_HEIGHT,
-        )
-        .position_centered()
-        .build()
-        .expect("unable to create window");
-
-    let mut canvas = window
-        .into_canvas()
-        .present_vsync()
-        .build()
-        .expect("unable to create canvas");
+    let ctx_can = sdlgame::standard_800_600_canvas(TITLE, MAX_WIDTH, MAX_HEIGHT);
+    let context = ctx_can.0;
+    let mut canvas = ctx_can.1;
 
     let mut state = State {
         bgcolor: Color::RGB(0, 0, 0),
@@ -105,6 +91,9 @@ fn main() -> Result<(), String> {
         state.handle_kp_minus(&kbstate);
         state.handle_plus(&kbstate);
         state.handle_minus(&kbstate);
+
+        let title = format!("{} - R({}) G({}) B({}) Rects({})", TITLE, state.bgcolor.r, state.bgcolor.g,state.bgcolor.b, state.rects.len());
+        canvas = sdlgame::set_window_title(canvas, &title);
 
         canvas.set_draw_color(state.bgcolor);
         canvas.clear();

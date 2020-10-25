@@ -7,7 +7,7 @@ use sdl2::pixels::Color;
 
 use sdlgame::keyboard::{KeyboardState};
 
-const TITLE: &str = "Keyboard State Demo - R,G,B increase Red,Green,Blue. Shift+R/G/B descreases";
+const TITLE: &str = "Stars Demo";
 const MAX_WIDTH: u32 = 800;
 const MAX_HEIGHT: u32 = 600;
 
@@ -49,9 +49,6 @@ fn main() -> Result<(), String> {
         state.handle_g(&kbstate);
         state.handle_b(&kbstate);
 
-        let title = format!("{} - R({}) G({}) B({})", TITLE, state.bgcolor.r, state.bgcolor.g,state.bgcolor.b);
-        canvas = sdlgame::set_window_title(canvas, &title);
-        
         canvas.set_draw_color(state.bgcolor);
         canvas.clear();
         canvas.present();

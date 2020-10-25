@@ -6,16 +6,15 @@ use sdl2::gfx::primitives::DrawRenderer;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::keyboard::Scancode;
 use sdl2::pixels::Color;
-use sdl2::render::WindowCanvas;
 
-use sdlgame::{KeyState, KeyStates, KeyboardState};
+use sdlgame::keyboard::KeyboardState;
 
-const INITIAL_CIRCLES: usize = 50;
-const MAX_CIRCLE_RADIUS: u32 = 100;
+const TITLE: &str = "Mouse State Demo";
 const MAX_WIDTH: u32 = 800;
 const MAX_HEIGHT: u32 = 600;
+const INITIAL_CIRCLES: usize = 50;
+const MAX_CIRCLE_RADIUS: u32 = 100;
 
 #[derive(Debug)]
 struct Line {
@@ -63,9 +62,7 @@ enum FillMode {
 }
 
 fn main() -> Result<(), String> {
-
-    let mut ctx_can = sdlgame::standard_800_600_canvas("Mouse State Demo", MAX_WIDTH, MAX_HEIGHT);
-
+    let ctx_can = sdlgame::standard_800_600_canvas(TITLE, MAX_WIDTH, MAX_HEIGHT);
     let mut context = ctx_can.0;
     let mut canvas = ctx_can.1;
 
