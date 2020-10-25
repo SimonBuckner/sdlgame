@@ -9,8 +9,10 @@ pub enum MouseButton {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum ButtonStates {
+pub enum ButtonState {
+    Released,
     Up,
+    Pressed,
     Down,
 }
 
@@ -18,14 +20,14 @@ pub enum ButtonStates {
 pub struct MouseState {
     cx: i32,
     cy: i32,
-    cl: ButtonStates,
-    cm: ButtonStates,
-    cr: ButtonStates,
+    cl: ButtonState,
+    cm: ButtonState,
+    cr: ButtonState,
     px: i32,
     py: i32,
-    pl: ButtonStates,
-    pm: ButtonStates,
-    pr: ButtonStates,
+    pl: ButtonState,
+    pm: ButtonState,
+    pr: ButtonState,
 }
 
 impl MouseState {
@@ -35,27 +37,27 @@ impl MouseState {
         let mut ms = MouseState {
             cx: 0,
             cy: 0,
-            cl: ButtonStates::Up,
-            cm: ButtonStates::Up,
-            cr: ButtonStates::Up,
+            cl: ButtonState::Up,
+            cm: ButtonState::Up,
+            cr: ButtonState::Up,
             px: 0,
             py: 0,
-            pl: ButtonStates::Up,
-            pm: ButtonStates::Up,
-            pr: ButtonStates::Up,
+            pl: ButtonState::Up,
+            pm: ButtonState::Up,
+            pr: ButtonState::Up,
         };
 
         ms.cx = current.x();
         ms.cy = current.y();
         
         if current.left() {
-            ms.cl = ButtonStates::Down;
+            ms.cl = ButtonState::Down;
         }
         if current.middle() {
-            ms.cm = ButtonStates::Down;
+            ms.cm = ButtonState::Down;
         }
         if current.right() {
-            ms.cr = ButtonStates::Down;
+            ms.cr = ButtonState::Down;
         }
 
         ms
@@ -74,45 +76,53 @@ impl MouseState {
         self.cy = current.y();
 
         self.cl = match current.left() {
-            true => { ButtonStates::Down }
-            false => { ButtonStates::Up }
+            true => { ButtonState::Down }
+            false => { ButtonState::Up }
         };
 
         self.cm = match current.left() {
-            true => { ButtonStates::Down }
-            false => { ButtonStates::Up }
+            true => { ButtonState::Down }
+            false => { ButtonState::Up }
         };
 
         self.cr = match current.right() {
-            true => { ButtonStates::Down }
-            false => { ButtonStates::Up }
+            true => { ButtonState::Down }
+            false => { ButtonState::Up }
         };
     }
 
-    pub fn get_pos(&self) -> Point {
+    pub fn pos(&self) -> Point {
         Point::new(self.cx, self.cy)
     }
 
-    pub fn left(self) -> ButtonStates {
+    pub fn x(&self) -> i32 {
+        self.cx
+    }
+
+    pub fn y(&self) -> i32 {
+        self.cy
+    }
+
+    pub fn left(self) -> ButtonState {
         self.cl
     }
-    pub fn middle(self) -> ButtonStates {
+    pub fn middle(self) -> ButtonState {
         self.cm
     }
-    pub fn right(self) -> ButtonStates {
+    pub fn right(self) -> ButtonState {
         self.cr
     }
 
     pub fn is_up(&self, button: MouseButton) -> bool {
         match button {
             MouseButton::Left => {
-                self.cl == ButtonStates::Up
+                self.cl == ButtonState::Up
             }
             MouseButton::Middle => { 
-                self.cm == ButtonStates::Up
+                self.cm == ButtonState::Up
             }
             MouseButton::Right => {
-                self.cr == ButtonStates::Up
+                self.cr == ButtonState::Up
             }
         }
     }
@@ -120,13 +130,13 @@ impl MouseState {
     pub fn is_down(&self, button: MouseButton) -> bool {
         match button {
             MouseButton::Left => {
-                self.cl == ButtonStates::Down
+                self.cl == ButtonState::Down
             }
             MouseButton::Middle => { 
-                self.cm == ButtonStates::Down
+                self.cm == ButtonState::Down
             }
             MouseButton::Right => {
-                self.cr == ButtonStates::Down
+                self.cr == ButtonState::Down
             }
         }
     }
@@ -134,13 +144,13 @@ impl MouseState {
     pub fn on_down(&self, button: MouseButton) -> bool {
         match button {
             MouseButton::Left => {
-                self.pl == ButtonStates::Up && self.cl == ButtonStates::Down
+                self.pl == ButtonState::Up && self.cl == ButtonState::Down
             }
             MouseButton::Middle => { 
-                self.pl == ButtonStates::Up && self.cl == ButtonStates::Down
+                self.pl == ButtonState::Up && self.cl == ButtonState::Down
             }
             MouseButton::Right => {
-                self.pl == ButtonStates::Up && self.cl == ButtonStates::Down
+                self.pl == ButtonState::Up && self.cl == ButtonState::Down
             }
         }
     }
@@ -148,15 +158,34 @@ impl MouseState {
     pub fn on_up(&self, button: MouseButton) -> bool {
         match button {
             MouseButton::Left => {
-                self.pl == ButtonStates::Down && self.cl == ButtonStates::Up
+                self.pl == ButtonState::Down && self.cl == ButtonState::Up
             }
             MouseButton::Middle => { 
-                self.pl == ButtonStates::Down && self.cl == ButtonStates::Up
+                self.pl == ButtonState::Down && self.cl == ButtonState::Up
             }
             MouseButton::Right => {
-                self.pl == ButtonStates::Down && self.cl == ButtonStates::Up
+                self.pl == ButtonState::Down && self.cl == ButtonState::Up
             }
         }
+    }
+
+    pub fn state(&self, button: MouseButton) -> ButtonState {
+        
+        let (cstate, pstate) = match button {
+            MouseButton::Left => (self.cl, self.pl),
+            MouseButton::Middle => (self.cm, self.pm),
+            MouseButton::Right => (self.cr, self.pr),
+        };
+
+        if cstate == ButtonState::Up && pstate == ButtonState::Down {
+            ButtonState::Released
+        } else if cstate == ButtonState::Up && pstate == ButtonState::Up {
+            ButtonState::Up
+        } else if cstate == ButtonState::Down && pstate == ButtonState::Up {
+            ButtonState::Pressed
+        } else  {
+            ButtonState::Down
+        } 
     }
 
 }

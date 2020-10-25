@@ -1,12 +1,11 @@
-
 use rand::prelude::*;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::keyboard::Scancode;
 use sdl2::pixels::Color;
-use sdl2::render::WindowCanvas;
 use sdl2::rect::Point;
+use sdl2::render::WindowCanvas;
 
 use sdlgame::keyboard::KeyboardState;
 
@@ -23,9 +22,8 @@ struct State {
 
 impl State {
     fn new() -> State {
-
-        State{
-            bgcolor: Color::RGB(0,0,0),
+        State {
+            bgcolor: Color::RGB(0, 0, 0),
             stars: Vec::new(),
         }
     }
@@ -92,6 +90,7 @@ impl State {
             }
         }
     }
+
     fn handle_g(&mut self, keyb: &KeyboardState) {
         if keyb.is_down(Scancode::G) {
             if keyb.is_down(Scancode::LShift) || keyb.is_down(Scancode::RShift) {
@@ -105,6 +104,7 @@ impl State {
             }
         }
     }
+
     fn handle_b(&mut self, keyb: &KeyboardState) {
         if keyb.is_down(Scancode::B) {
             if keyb.is_down(Scancode::LShift) || keyb.is_down(Scancode::RShift) {
@@ -134,7 +134,6 @@ impl State {
                 star.speed_x = new_star.speed_x;
                 star.speed_y = new_star.speed_y;
                 star.color = new_star.color;
-
             } else {
                 star.move_pos(x, y)
             }
@@ -144,11 +143,10 @@ impl State {
         for star in self.stars.iter() {
             canvas.set_draw_color(star.color);
             let p = Point::new(star.x as i32, star.y as i32);
-            let _ =canvas.draw_point(p);
+            let _ = canvas.draw_point(p);
         }
     }
 }
-
 
 #[derive(Debug, Copy, Clone)]
 struct Star {
@@ -166,18 +164,17 @@ impl Star {
         let angle = rng.gen_range(-3.14, 3.14) as f64;
         let speed_range = rng.gen_range(0.3, 0.9) as f64;
         let speed = 255.0 * speed_range.powi(2) as f64;
-        
         let dx = angle.cos();
         let dy = angle.sin();
-        
-        let d = rng.gen_range(25, 125) as f64; 
-    
-        let s = Star{
-            x: (MAX_WIDTH / 2) as f64 + dx*d,
-            y: (MAX_HEIGHT / 2) as f64 + dy*d,
+
+        let d = rng.gen_range(25, 125) as f64;
+
+        let s = Star {
+            x: (MAX_WIDTH / 2) as f64 + dx * d,
+            y: (MAX_HEIGHT / 2) as f64 + dy * d,
             speed_x: speed * dx,
             speed_y: speed * dy,
-            color:  Color::RGB(
+            color: Color::RGB(
                 rng.gen_range(0, 255),
                 rng.gen_range(0, 255),
                 rng.gen_range(0, 255),
