@@ -1,7 +1,14 @@
 pub mod keyboard;
 pub mod mouse;
+pub mod shapes;
 
-pub fn standard_800_600_canvas(title: &str, width: u32, height: u32) -> (sdl2::Sdl, sdl2::render::WindowCanvas) {
+use sdl2::render::WindowCanvas;
+
+pub trait Draw {
+    fn draw(&self, canvas: &mut WindowCanvas);
+}
+
+pub fn standard_800_600_canvas(title: &str, width: u32, height: u32) -> (sdl2::Sdl, WindowCanvas) {
     let context = sdl2::init().expect("sdl2::init failed");
     let video_subsystem = context.video().expect("video subsytem init failed");
 
@@ -21,7 +28,7 @@ pub fn standard_800_600_canvas(title: &str, width: u32, height: u32) -> (sdl2::S
     (context, canvas)
 }
 
-pub fn set_window_title(canvas: sdl2::render::WindowCanvas, title: &str) -> sdl2::render::WindowCanvas {
+pub fn set_window_title(canvas: WindowCanvas, title: &str) -> WindowCanvas {
     let mut c = canvas;
     {
         let w = c.window_mut();
@@ -30,3 +37,12 @@ pub fn set_window_title(canvas: sdl2::render::WindowCanvas, title: &str) -> sdl2
     c
 }
 
+pub fn calc_distance(x1: i32, y1: i32, x2: i32, y2: i32) -> f64 {
+
+    let x_dist = x1 - x2;
+    let y_dist = y1 - y2;
+
+    let dist = x_dist.pow(2) + y_dist.pow(2);
+
+    (dist as f64).sqrt()
+}
